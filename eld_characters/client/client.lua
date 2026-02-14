@@ -12,10 +12,47 @@ local function setUi(open)
   SendNUIMessage({ action = open and "open" or "close" })
 end
 
+local function setCreatorUi(open, info)
+  SetNuiFocus(open, open)
+
+  local ped = PlayerPedId()
+  FreezeEntityPosition(ped, open)
+  SetEntityVisible(ped, true, false) -- im Creator sichtbar lassen
+  SetPlayerControl(PlayerId(), not open, 0)
+
+  if open then
+    SendNUIMessage({ action = "creator_open", data = info })
+  else
+    SendNUIMessage({ action = "open" })
+  end
+end
+
+local function setPlayerModel(modelName)
+  if not modelName or modelName == "" then return end
+  local model = GetHashKey(modelName)
+
+  RequestModel(model)
+  while not HasModelLoaded(model) do Wait(0) end
+
+  SetPlayerModel(PlayerId(), model, false)
+  SetModelAsNoLongerNeeded(model)
+end
+
+local function applyAppearance(appearanceJson)
+  if not appearanceJson or appearanceJson == "" then return end
+  if not json or not json.decode then return end
+
+  local ok, data = pcall(function() return json.decode(appearanceJson) end)
+  if not ok or not data then return end
+
+  if data.model then
+    setPlayerModel(data.model)
+  end
+end
+
 RegisterNetEvent("eld:chars:open")
 AddEventHandler("eld:chars:open", function()
   setUi(true)
-  -- ask server for list
   TriggerServerEvent("eld:chars:list")
 end)
 
@@ -40,7 +77,11 @@ AddEventHandler("eld:chars:spawn", function(c)
   setUi(false)
 
   local ped = PlayerPedId()
-  SetEntityCoords(ped, c.x + 0.0, c.y + 0.0, c.z + 0.0, false, false, false, true)
+  SetEntityCoords(ped, (c.x or 0) + 0.0, (c.y or 0) + 0.0, (c.z or 0) + 0.0, false, false, false, true)
+
+  if c.appearance then
+    applyAppearance(c.appearance)
+  end
 end)
 
 -- NUI callbacks
@@ -59,16 +100,14 @@ RegisterNUICallback("close", function(_, cb)
   cb({ ok = true })
 end)
 
--- Character create
-
+-- Creator open from server
 RegisterNetEvent("eld:creator:open")
 AddEventHandler("eld:creator:open", function(info)
-  -- UI öffnen + freeze wie chars ui
-  SetNuiFocus(true, true)
-  local ped = PlayerPedId()
-  FreezeEntityPosition(ped, true)
-  SetEntityVisible(ped, true, false) -- sichtbar im creator
-  SetPlayerControl(PlayerId(), false, 0)
+  setCreatorUi(true, info)
+end)
 
-  SendNUIMessage({ action = "creator_open", data = info })
+-- Creator finish from UI
+RegisterNUICallback("creatorFinish", function(data, cb)
+  TriggerServerEvent("eld:creator:finish", data.charId, data.appearance)
+  cb({ ok = true })
 end)

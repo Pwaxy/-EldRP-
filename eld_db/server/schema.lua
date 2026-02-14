@@ -25,28 +25,16 @@ CreateThread(function()
       pos_x DOUBLE NOT NULL DEFAULT 0,
       pos_y DOUBLE NOT NULL DEFAULT 0,
       pos_z DOUBLE NOT NULL DEFAULT 0,
+      appearance LONGTEXT NULL,
       PRIMARY KEY (id),
       KEY idx_char_player (player_id),
       CONSTRAINT fk_char_player FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   ]])
 
-  DB.execute([[
-  CREATE TABLE IF NOT EXISTS characters (
-    id INT NOT NULL AUTO_INCREMENT,
-    player_id INT NOT NULL,
-    first_name VARCHAR(32) NOT NULL,
-    last_name VARCHAR(32) NOT NULL,
-    created_at DATETIME NOT NULL,
-    last_played DATETIME NULL,
-    pos_x DOUBLE NOT NULL DEFAULT 0,
-    pos_y DOUBLE NOT NULL DEFAULT 0,
-    pos_z DOUBLE NOT NULL DEFAULT 0,
-    PRIMARY KEY (id),
-    KEY idx_char_player (player_id),
-    CONSTRAINT fk_char_player FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-]])
+  -- optional: 1 slot standard (kann später vom Team erhöht werden)
+  -- wenn das einmal "Duplicate column" loggt: ist ok.
+  DB.execute("ALTER TABLE players ADD COLUMN char_slots INT NOT NULL DEFAULT 1")
 
   print("[eld_db] schema ensured ✅")
 end)

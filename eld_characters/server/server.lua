@@ -51,11 +51,11 @@ end
 
 local function getChar(charId)
   local rows = exports.oxmysql:query_async([[
-    SELECT id, player_id, first_name, last_name, pos_x, pos_y, pos_z
-    FROM characters
-    WHERE id=?
-    LIMIT 1
-  ]], { charId })
+  SELECT id, player_id, first_name, last_name, pos_x, pos_y, pos_z, appearance
+  FROM characters
+  WHERE id=? LIMIT 1
+]], { charId })
+
 
   if rows and rows[1] then return rows[1] end
   return nil
@@ -143,16 +143,26 @@ AddEventHandler("eld:chars:select", function(charId)
   end
 
   SelectedChar[src] = charId
-  setLastPlayed(charId)
+setLastPlayed(charId)
 
-  TriggerClientEvent("eld:chars:spawn", src, {
+if not c.appearance or c.appearance == "" then
+  TriggerClientEvent("eld:creator:open", src, {
     charId = c.id,
     first = c.first_name,
-    last = c.last_name,
-    x = c.pos_x,
-    y = c.pos_y,
-    z = c.pos_z
+    last = c.last_name
   })
+  return
+end
+
+TriggerClientEvent("eld:chars:spawn", src, {
+  charId = c.id,
+  first = c.first_name,
+  last = c.last_name,
+  x = c.pos_x,
+  y = c.pos_y,
+  z = c.pos_z,
+  appearance = c.appearance
+})
 end)
 
 AddEventHandler("playerDropped", function()
@@ -161,4 +171,29 @@ end)
 
 exports("GetSelectedCharId", function(src)
   return SelectedChar[src]
+end)
+
+RegisterNetEvent("eld:creator:finish")
+AddEventHandler("eld:creator:finish", function(charId, appearanceJson)
+  local src = source
+  local auth = exports.eld_auth:GetPlayerAuth(src)
+  if not auth or not auth.playerId then return end
+
+  charId = tonumber(charId)
+  if not charId or type(appearanceJson) ~= "string" then return end
+  if #appearanceJson > 20000 then return end
+
+  local c = getChar(charId)
+  if not c then return end
+  if tonumber(c.player_id) ~= tonumber(auth.playerId) then return end
+
+  exports.oxmysql:execute("UPDATE characters SET appearance=? WHERE id=?", { appearanceJson, charId })
+
+  TriggerClientEvent("eld:chars:spawn", src, {
+    charId = c.id,
+    x = c.pos_x,
+    y = c.pos_y,
+    z = c.pos_z,
+    appearance = appearanceJson
+  })
 end)
