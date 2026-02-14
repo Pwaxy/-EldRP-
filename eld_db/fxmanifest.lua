@@ -8,7 +8,7 @@ version '0.0.1'
 server_only 'yes'
 description 'Eld Db'
 
-dependencies { 
+dependencies {
 	'oxmysql'
 }
 

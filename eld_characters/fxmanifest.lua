@@ -7,7 +7,7 @@ author 'Pwaxy'
 version '0.0.1'
 description 'Eld Characters'
 
-dependencies {
+server_dependencies {
   'eld_db',
   'eld_auth'
 }
