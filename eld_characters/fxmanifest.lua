@@ -7,22 +7,23 @@ author 'Pwaxy'
 version '0.0.1'
 description 'Eld Characters'
 
-ui_page 'client/ui/index.html'
-
-file {
-	'client/ui/index.html',
-	'client/ui/assets/css/style.css',
-	'client/ui/assets/js/app.js'
+dependencies {
+  'eld_db',
+  'eld_auth'
 }
 
-dependency 'eld_core'
-dependency 'eld_auth'
-dependency 'eld_db'
+ui_page 'ui/index.html'
+
+files {
+	'ui/index.html',
+	'ui/assets/css/style.css',
+	'ui/assets/js/app.js'
+}
 
 server_scripts {
-	'server/Eld.Characters.Server.net.dll'
+	'server/server.lua'
 }
 
 client_scripts {
-	'client/Eld.Characters.Client.net.dll'
+	'client/client.lua'
 }

@@ -13,8 +13,6 @@ CreateThread(function()
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   ]])
 
-  DB.execute("ALTER TABLE players ADD COLUMN char_slots INT NOT NULL DEFAULT 1")
-
   -- characters
   DB.execute([[
     CREATE TABLE IF NOT EXISTS characters (
