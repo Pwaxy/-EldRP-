@@ -1,4 +1,4 @@
-body { margin:0; font-family: Arial, sans-serif; background: transparent; }
+html, body { cursor: default !important; margin:0; font-family: Arial, sans-serif; background: transparent; }
 .hidden { display:none; }
 
 #wrap {
@@ -27,13 +27,14 @@ input {
   border: 1px solid rgba(255,255,255,0.15);
   background: rgba(0,0,0,0.35);
   color: white;
+  cursor: text !important;
 }
 
 button {
   padding: 10px 14px;
   border-radius: 10px;
   border: none;
-  cursor:pointer;
+  cursor:pointer !important;
 }
 
 button.ghost {

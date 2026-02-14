@@ -1,4 +1,5 @@
 local uiOpen = false
+local forceCursor = false
 local creatorOpen = false
 
 local function lockPlayer(lock, visibleInCreator)
@@ -20,7 +21,9 @@ end
 -- Hard block controls while UI/Creator open (fixes camera turning)
 Citizen.CreateThread(function()
   while true do
-    if uiOpen or creatorOpen then
+    if uiOpen or creatorOpen and forceCursor then
+      SetNuiFocus(true, true)
+      SetCursorLocation(0.5, 0.5)
       DisableAllControlActions(0)
       DisableAllControlActions(1)
       DisableAllControlActions(2)
@@ -42,6 +45,7 @@ local function setUi(open)
   creatorOpen = false
 
   if open then
+    forceCursor = true;
     DoScreenFadeOut(200)
     while not IsScreenFadedOut() do Wait(0) end
 
@@ -57,6 +61,7 @@ local function setUi(open)
 
     DoScreenFadeIn(200)
   else
+    forceCursor = false;
     SetNuiFocus(false, false)
     SendNUIMessage({ action = "close" })
   end
@@ -70,12 +75,15 @@ local function setCreatorUi(open, info)
     -- Im Creator: sichtbar, aber weiterhin Controls gesperrt + Maus aktiv
     lockPlayer(true, true)
 
+    forceCursor = open;
+
     SetNuiFocus(true, true)
     SetCursorLocation(0.5, 0.5)
     SendNUIMessage({ action = "creator_open", data = info })
   else
     creatorOpen = false
     -- zurück zur selection UI
+    forceCursor = open;
     lockPlayer(true, false)
     SetNuiFocus(true, true)
     SetCursorLocation(0.5, 0.5)
