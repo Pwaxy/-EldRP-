@@ -28,19 +28,16 @@ end
 local function upsertPlayer(ids)
   local now = os.date("!%Y-%m-%d %H:%M:%S")
 
-  exports.oxmysql:execute([[
+  -- MariaDB: RETURNING liefert auch bei Duplicate Key die id zurück
+  local rows = exports.oxmysql:query_async([[
     INSERT INTO players (license, steam, discord, first_seen, last_seen)
     VALUES (?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       steam = VALUES(steam),
       discord = VALUES(discord),
       last_seen = VALUES(last_seen)
+    RETURNING id
   ]], { ids.license, ids.steam, ids.discord, now, now })
-
-  local rows = exports.oxmysql:query_async(
-    "SELECT id FROM players WHERE license = ? LIMIT 1",
-    { ids.license }
-  )
 
   if rows and rows[1] and rows[1].id then
     return tonumber(rows[1].id)
@@ -48,6 +45,7 @@ local function upsertPlayer(ids)
 
   return nil
 end
+
 
 AddEventHandler("playerJoining", function()
   local src = source

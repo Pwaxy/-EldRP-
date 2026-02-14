@@ -18,7 +18,7 @@ local function lockPlayer(lock, visibleInCreator)
 end
 
 -- Hard block controls while UI/Creator open (fixes camera turning)
-CreateThread(function()
+Citizen.CreateThread(function()
   while true do
     if uiOpen or creatorOpen then
       DisableAllControlActions(0)
@@ -49,6 +49,9 @@ local function setUi(open)
     lockPlayer(true, false)
 
     SetNuiFocus(true, true)
+    if SetNuiFocusKeepInput then
+      SetNuiFocusKeepInput(false)
+    end
     SetCursorLocation(0.5, 0.5)
     SendNUIMessage({ action = "open" })
 
